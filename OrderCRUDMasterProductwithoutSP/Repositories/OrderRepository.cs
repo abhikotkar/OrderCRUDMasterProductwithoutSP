@@ -113,5 +113,42 @@ namespace OrderCRUDMasterProductwithoutSP.Repositories
                 return grandtotal;
             }
         }
+
+        public async Task<int> UpdateOrder(Order order)
+        {
+            int result = 0;
+            var query = @"update DMartBill set orderCode = @orderCode, custName = @custName, mobileNumber = @mobileNumber,
+                          shippingAddress = @shippingAddress, billingAddress = @billingAddress where orderId = @orderId";
+
+            using (var connection = _context.CreateConnection())
+            {
+                result = await connection.ExecuteAsync(query, order);
+                if (result != 0)
+                {
+                    result = await connection.ExecuteAsync(@"delete from Odetails where orderId=@orderId"
+                                                           , new { orderId = order.orderId });
+                    var result1 = await AddProduct(order.OrderDetails, order.orderId);
+                    order.totalAmount = result1;
+                    var qry1 = "update DMartBill set totalAmount=@totalAmount where orderId=@orderId";
+
+                    var result3 = await connection.ExecuteAsync(qry1, new { totalAmount = order.totalAmount, orderId = order.orderId });
+
+
+                }
+                return result;
+            }
+        }
+
+        public async Task<int> Delete(int id)
+        {
+
+            var query = @"Delete from Odetails where orderId=@orderId
+                          Delete from DMartBill where orderId=@orderId";
+            using (var connection = _context.CreateConnection())
+            {
+                var result = await connection.ExecuteAsync(query, new { orderId = id });
+                return result;
+            }
+        }
     }
 }

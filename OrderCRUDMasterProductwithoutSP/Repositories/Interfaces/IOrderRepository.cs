@@ -8,5 +8,8 @@ namespace OrderCRUDMasterProductwithoutSP.Repositories.Interfaces
         public Task<Order> GetOrderById(int id);
 
         public Task<double> PlaceOrder(Order order);
+        public Task<int> UpdateOrder(Order order);
+
+        public Task<int> Delete(int id);
     }
 }
